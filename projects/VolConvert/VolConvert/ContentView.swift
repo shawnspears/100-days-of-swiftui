@@ -8,43 +8,79 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var startVol = 0.0
-    @State private var startUnit: String = ""
-    @State private var endVol = 0.0
-    @State private var endUnit: String = ""
+    @State private var input = 0.0
+    @State private var inputUnit: String = "milliliters"
+    @State private var outputUnit: String = "liters"
     
-    private let units = ["mL", "L", "cups", "pints", "gallons"]
+    private let units = ["milliliters", "liters", "cups", "pints", "gallons"]
     @FocusState private var volIsFocused: Bool
+    
+    var output: String {
+        let inputToMilliliters: Double
+        let milliliterssToOutput: Double
+        
+        switch inputUnit {
+        case "liters":
+            inputToMilliliters = 1000
+        case "cups":
+            inputToMilliliters = 236.588
+        case "pints":
+            inputToMilliliters = 473.176
+        case "gallons":
+            inputToMilliliters = 3785.412
+        default:
+            inputToMilliliters = 1.0
+        }
+        
+        switch outputUnit {
+        case "liters":
+            milliliterssToOutput = 0.001
+        case "cups":
+            milliliterssToOutput = 0.00422675
+        case "pints":
+            milliliterssToOutput = 0.00211338
+        case "gallons":
+            milliliterssToOutput = 0.000264172
+        default:
+            milliliterssToOutput = 1.0
+        }
+        
+        let inputMilliliters = input * inputToMilliliters
+        let output = inputMilliliters * milliliterssToOutput
+        let outputString = output.formatted()
+        return "\(outputString) \(outputUnit)"
+    }
+    
     
     var body: some View {
         NavigationView {
             Form {
                 Section {
-                    TextField("Starting Volume", value: $startVol, format: .number)
+                    TextField("Starting Volume", value: $input, format: .number)
                         .keyboardType(.decimalPad)
                         .focused($volIsFocused)
-                    Picker("Units", selection: $startUnit) {
-                        ForEach(units, id: \.self) {
-                            Text($0)
-                        }
-                    }
-                    .pickerStyle(.segmented)
                 } header: {
-                    Text("Convert From")
+                    Text("Amount to convert")
                 }
 
-                Section {
-                    Text(endVol, format: .number)
-                    Picker("Units", selection: $endUnit) {
-                        ForEach(units, id: \.self) {
-                            Text($0)
-                        }
+                Picker("Convert from", selection: $inputUnit) {
+                    ForEach(units, id: \.self) {
+                        Text($0)
                     }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("To")
                 }
                 
+                Picker("Convert to", selection: $outputUnit) {
+                    ForEach(units, id: \.self) {
+                        Text($0)
+                    }
+                }
+                
+                Section {
+                    Text(output)
+                } header: {
+                    Text("Output")
+                }
+
             }
             .navigationTitle("VolConvert")
             .toolbar {
