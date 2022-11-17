@@ -103,6 +103,7 @@ struct ContentView: View {
     func checkGameOver() {
         if numQuestions == 8 {
             gameOver = true
+            showingScore = false
         }
     }
     
@@ -110,6 +111,7 @@ struct ContentView: View {
         gameOver = false
         score = 0
         numQuestions = 0
+        askQuestion()
     }
 }
 
