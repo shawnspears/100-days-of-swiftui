@@ -9,9 +9,13 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var score = 0
-    @State private var moves = ["Rock", "Paper", "Scissors"]
+    @State private var scoreTitle = ""
+    @State private var showingScore = false
     @State private var appMove = Int.random(in: 0...2)
     @State private var shouldWin = true
+    
+    let moves = [("Rock", "Paper"),  ("Paper", "Scissors"), ("Scissors", "Rock")]
+    let symbols = ["circle", "paperplane.fill", "scissors"]
 
     
     var body: some View {
@@ -28,16 +32,27 @@ struct ContentView: View {
                     .font(.largeTitle.bold())
                     .foregroundColor(.white)
                 
-                VStack(spacing: 15) {
+                VStack(spacing: 20) {
                     VStack {
                         Text("The app chose:")
                             .foregroundStyle(.secondary)
                             .font(.subheadline.weight(.heavy))
-                        Text(moves[appMove])
+                        Text(moves[appMove].0)
                             .font(.largeTitle.weight(.semibold))
                         Text("Choose the correct move in order to " + (shouldWin ? "WIN" : "LOSE"))
                             .foregroundStyle(.secondary)
                             .font(.subheadline.weight(.heavy))
+                        
+                        ForEach(0..<3) {number in
+                            Button {
+                                moveTapped(number)
+                            } label: {
+                                Image(systemName: symbols[number])
+                                    .renderingMode(.original)
+                                    .font(.system(size: 72))
+                            }
+                            .padding(.vertical, 10)
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -56,8 +71,43 @@ struct ContentView: View {
             }
             .padding()
         }
+        .alert(scoreTitle, isPresented: $showingScore) {
+            Button("Continue", action: askQuestion)
+        } message: {
+            Text("Your score is \(score)")
+        }
+    }
+
+    func askQuestion() {
+        appMove = Int.random(in: 0...2)
+        shouldWin.toggle()
     }
     
+    func moveTapped(_ number: Int) {
+        let move = moves[number].0
+        if shouldWin {
+            if move == moves[appMove].0 {
+                scoreTitle = "Draw"
+            } else if move == moves[appMove].1 {
+                scoreTitle = "Correct"
+                score += 1
+            } else {
+                scoreTitle = "Wrong"
+                score -= 1
+            }
+        } else {
+            if move == moves[appMove].0 {
+                scoreTitle = "Draw"
+            } else if move == moves[appMove].1 {
+                scoreTitle = "Wrong"
+                score -= 1
+            } else {
+                scoreTitle = "Correct"
+                score += 1
+            }
+        }
+        showingScore = true
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
