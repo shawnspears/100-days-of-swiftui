@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var showingScore = false
     @State private var appMove = Int.random(in: 0...2)
     @State private var shouldWin = true
+    @State private var numQuestions = 1
+    @State private var gameOver = false
     
     let moves = [("Rock", "Paper"),  ("Paper", "Scissors"), ("Scissors", "Rock")]
     let symbols = ["circle", "paperplane.fill", "scissors"]
@@ -63,6 +65,9 @@ struct ContentView: View {
                 Spacer()
                 Spacer()
                 
+                Text("Question: \(numQuestions)/10")
+                    .foregroundColor(.gray)
+                    .font(.headline.weight(.semibold))
                 Text("Score: \(score)")
                     .foregroundColor(.gray)
                     .font(.largeTitle.weight(.semibold))
@@ -71,16 +76,34 @@ struct ContentView: View {
             }
             .padding()
         }
+        .alert("Game Over", isPresented: $gameOver) {
+            Button("Restart Game", action: restartGame)
+        } message: {
+            Text("Your final score is \(score)")
+        }
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: askQuestion)
         } message: {
             Text("Your score is \(score)")
         }
     }
-
+    
+    func restartGame() {
+        numQuestions = 0
+        score = 0
+        gameOver = false
+        askQuestion()
+    }
+    
     func askQuestion() {
-        appMove = Int.random(in: 0...2)
-        shouldWin.toggle()
+        if numQuestions == 10 {
+            gameOver = true
+            showingScore = false
+        } else {
+            appMove = Int.random(in: 0...2)
+            shouldWin.toggle()
+            numQuestions += 1
+        }
     }
     
     func moveTapped(_ number: Int) {
