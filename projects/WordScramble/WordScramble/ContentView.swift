@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
+    @State private var score = 0
     
     @State private var errorTitle = ""
     @State private var errorMessage = ""
@@ -41,6 +42,18 @@ struct ContentView: View {
             } message: {
                 Text(errorMessage)
             }
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    VStack{
+                        Button("Restart Game") {
+                            restartGame()
+                        }
+                        Text("Score: \(score)")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                }
+            }
         }
     }
     
@@ -63,10 +76,21 @@ struct ContentView: View {
             return
         }
         
+        guard hasAtLeastThreeLetters(word: answer) else {
+            wordError(title: "Word shorter than 3 letters", message: "Only words with 3 letters or more are accepted!")
+            return
+        }
+        
+        guard isNotStartWord(word: answer) else {
+            wordError(title: "Word is start word", message: "You can't just use the same word!")
+            return
+        }
+        
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
+        score += answer.count
     }
     
     func startGame() {
@@ -78,6 +102,12 @@ struct ContentView: View {
             }
         }
         fatalError("Could not laod start.txt from bundle.")
+    }
+    
+    func restartGame(){
+        score = 0
+        usedWords.removeAll()
+        startGame()
     }
     
     func isOriginal(word: String) -> Bool {
@@ -103,6 +133,14 @@ struct ContentView: View {
         let range = NSRange(location: 0, length: word.utf16.count)
         let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
         return misspelledRange.location == NSNotFound
+    }
+    
+    func hasAtLeastThreeLetters(word: String) -> Bool {
+        return (word.count >= 3)
+    }
+    
+    func isNotStartWord(word: String) -> Bool {
+        return (word != rootWord)
     }
     
     func wordError(title: String, message: String) {
