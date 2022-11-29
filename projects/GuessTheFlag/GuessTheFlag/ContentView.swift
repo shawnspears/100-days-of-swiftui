@@ -57,6 +57,8 @@ struct ContentView: View {
                             flagTapped(number)
                         } label: {
                             FlagImage(country: countries[number])
+                                .rotation3DEffect(.degrees(selected == number ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+                                .animation(.default, value: selected)
                         }
                     }
                 }
