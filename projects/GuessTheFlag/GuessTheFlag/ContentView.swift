@@ -23,7 +23,7 @@ struct ContentView: View {
     @State private var gameOver = false
     @State private var scoreTitle = ""
     @State private var score = 0
-    @State private var selected = 0
+    @State private var selected = -1
     @State private var numQuestions = 0
      
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
@@ -58,6 +58,8 @@ struct ContentView: View {
                         } label: {
                             FlagImage(country: countries[number])
                                 .rotation3DEffect(.degrees(selected == number ? 360 : 0), axis: (x: 0, y: 1, z: 0))
+                                .opacity(selected == -1 || selected == number ? 1 : 0.25)
+                                .saturation(selected == -1 || selected == number ? 1 : 0.25)
                                 .animation(.default, value: selected)
                         }
                     }
@@ -81,7 +83,7 @@ struct ContentView: View {
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: askQuestion)
         } message: {
-            Text("That's the flag of \(countries[selected])! " +
+            Text(selected == -1 ? "No flag selected" : "That's the flag of \(countries[selected])! " +
                  "Your score is \(score)")
         }
         .alert("Game Over", isPresented: $gameOver) {
@@ -92,6 +94,7 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int) {
+        selected = number
         if number == correctAnswer {
             scoreTitle = "Correct"
             score += 1
@@ -100,7 +103,6 @@ struct ContentView: View {
             score -= 1
         }
         showingScore = true
-        selected = number
         numQuestions += 1
         checkGameOver()
     }
@@ -108,6 +110,7 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        selected = -1
     }
     
     func checkGameOver() {
